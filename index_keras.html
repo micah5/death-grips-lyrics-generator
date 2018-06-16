@@ -3,7 +3,7 @@
 <body>
 Hello world
 <script src="https://cdn.jsdelivr.net/gh/nicolaspanel/numjs@0.15.1/dist/numjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.11.6"> </script>
+<script src="https://unpkg.com/keras-js"></script>
 <script>
 var char_indices = {
   '\xe9': 54,
@@ -137,6 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.write('Loading...');
 });
 
+// Make sure to copy model.bin to the public directory.
+const model = new KerasJS.Model({
+  filepath: 'model.bin',
+});
+
 function sample(preds, temperature=1.0) {
   preds = nj.log(preds) / temperature
   exp_preds = nj.exp(preds)
@@ -146,8 +151,8 @@ function sample(preds, temperature=1.0) {
 }
 
 async function predict_from_model() {
-  const model = await tf.loadModel('model.json');
   try {
+    await model.ready()
     var generated = ''
     var seed = "bald head girl bald head girl bald head "
     var diversity = 0.5
@@ -158,7 +163,14 @@ async function predict_from_model() {
         console.log("j " + j + ": " + seed.charAt(j) + " " + char_indices[seed.charAt(j)])
         x_pred[0][j][char_indices[seed.charAt(j)]] = 1
       }
-      const preds = model.predict(x_pred)//await model.predict(inputData)
+
+      const inputData = {
+        input: new Float32Array(new Float32Array([1, 0, 0, 0, 1, 0, 0, 0, 1]))
+      }
+      console.log(JSON.stringify(x_pred))
+      console.log("float32array " + JSON.stringify(inputData))
+      const outputData = await model.predict(inputData)
+      var preds = Array.prototype.slice.call(outputData)
       console.log(JSON.stringify(preds))
       var next_index = sample(preds, diversity)
       console.log(next_index)

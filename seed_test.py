@@ -11,6 +11,8 @@ import random
 import sys
 import io
 
+np.set_printoptions(threshold='nan')
+
 def sample(preds, temperature=1.0):
     # helper function to sample an index from a probability array
     preds = np.asarray(preds).astype('float64')
@@ -27,11 +29,11 @@ print('corpus length:', len(text))
 chars = sorted(list(set(text)))
 char_indices = dict((c, i) for i, c in enumerate(chars))
 indices_char = dict((i, c) for i, c in enumerate(chars))
+print(indices_char)
 
-diversity = 0.2
+diversity = 0.5
 maxlen = 40
 model = load_model('model.keras')
-model.save('model.h5')
 generated = ''
 word = "bald head girl "
 maxlen_word = (word * ((maxlen/len(word))+1))[:maxlen]
@@ -40,10 +42,11 @@ generated += seed
 print('----- Generating with seed: "' + seed + '"')
 sys.stdout.write(generated)
 
-for i in range(1000):
+for i in range(1):
     x_pred = np.zeros((1, maxlen, len(chars)))
     for t, char in enumerate(seed):
         x_pred[0, t, char_indices[char]] = 1.
+    print(x_pred)
 
     preds = model.predict(x_pred, verbose=0)[0]
     next_index = sample(preds, diversity)
