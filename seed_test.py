@@ -31,6 +31,7 @@ indices_char = dict((i, c) for i, c in enumerate(chars))
 diversity = 0.2
 maxlen = 40
 model = load_model('model.keras')
+model.save('model.h5')
 generated = ''
 word = "bald head girl "
 maxlen_word = (word * ((maxlen/len(word))+1))[:maxlen]
