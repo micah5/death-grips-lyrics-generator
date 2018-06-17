@@ -42,11 +42,10 @@ generated += seed
 print('----- Generating with seed: "' + seed + '"')
 sys.stdout.write(generated)
 
-for i in range(1):
+for i in range(1000):
     x_pred = np.zeros((1, maxlen, len(chars)))
     for t, char in enumerate(seed):
         x_pred[0, t, char_indices[char]] = 1.
-    print(x_pred)
 
     preds = model.predict(x_pred, verbose=0)[0]
     next_index = sample(preds, diversity)
