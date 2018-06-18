@@ -23,8 +23,8 @@ a {
 #output {
   width: 100%;
   resize: none;
-  background-color: transparent;
-  color: white;
+  background-color: yellow;
+  color: black;
   font-family: 'Cousine', monospace;
   border: none;
 }
@@ -32,7 +32,7 @@ a {
 <body>
 <div id="center">
   <div>
-    death grips neural network <a href="#" id="generate_lyrics"><i>generate lyrics</i></a>
+    death grips neural network <a href="https://github.com/98mprice/death-grips-lyrics-generator"><i>source code</i></a>
   </div>
   <div id="loading"></div>
   <textarea rows="20" id="output"></textarea>
@@ -193,47 +193,59 @@ function sample(preds, temperature) {
   return indexOfMax(arr)
 }
 
+var generated = ''
+var seed = makeid()
+var diversity = 0.4
+var maxlen = 40
+var str = seed.charAt(seed.length - 1)
+
+var hardWork = function() {
+  return new Promise((resolve, reject) => {
+    setTimeout(_ => {
+      resolve();
+    }, 1)
+  })
+}
+
+function makeid() {
+  var text = "";
+  var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+  for (var i = 0; i < 40; i++)
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+  return text;
+}
+
 async function predict_from_model() {
   $("#loading").html("<div>loading model...</div><div><small>(give it a minute)</small></div>")
-  const model = await tf.loadModel('https://raw.githubusercontent.com/98mprice/death-grips-lyrics-generator/master/model.json');
-  setTimeout(function() {
-      $("#loading").html("loaded")
-  }, 0);
-  try {
-    var generated = ''
-    var seed = "bald head girl bald head girl bald sadss"
-    var diversity = 0.5
-    var maxlen = 40
-    var str = ""
-    for (var i = 0; i < 100; i++) {
-      var x_pred = nj.zeros([1, maxlen, 61]).tolist()
-      for (var j = 0; j < seed.length; j++) {
-        x_pred[0][j][char_indices[seed.charAt(j)]] = 1
-      }
-      var test = tf.tensor3d(x_pred)
-      const output = model.predict(test)//await model.predict(inputData)
-      var preds = Array.prototype.slice.call(await output.data());
-      var next_index = sample(preds, diversity)
-      var next_char = indices_char[next_index]
 
-      generated += next_char
-      seed = seed.substr(1) + next_char
+  var model = await tf.loadModel('https://raw.githubusercontent.com/98mprice/death-grips-lyrics-generator/master/model.json');
+  $("#loading").hide()
 
-      str += next_char
-      $("#output").append(next_char)
+  for (var i = 0; i < 500; i++) {
+    var x_pred = nj.zeros([1, maxlen, 61]).tolist()
+    for (var j = 0; j < seed.length; j++) {
+      x_pred[0][j][char_indices[seed.charAt(j)]] = 1
     }
-    $("#loading").html("<a href='https://github.com/98mprice/death-grips-lyrics-generator'><small>source code</small></a>")
-    $("#output").append(str)
-  } catch (err) {
-    console.log(err)
-    // handle error
+    var test = tf.tensor3d(x_pred)
+    const output = model.predict(test)//await model.predict(inputData)
+    var output_data = await output.dataSync()
+    var preds = Array.prototype.slice.call(output_data);
+    var next_index = sample(preds, diversity)
+    var next_char = indices_char[next_index]
+
+    generated += next_char
+    seed = seed.substr(1) + next_char
+
+    str += next_char
+    await hardWork()
+    $("#output").append(next_char)
   }
 }
 
 $(document).ready(function(){
-  $( "#generate_lyrics" ).click(function() {
-    predict_from_model()
-  });
+  predict_from_model()
 });
 
 /*
