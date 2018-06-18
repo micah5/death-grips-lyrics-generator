@@ -223,7 +223,7 @@ async function predict_from_model() {
   var model = await tf.loadModel('https://raw.githubusercontent.com/98mprice/death-grips-lyrics-generator/master/model.json');
   $("#loading").hide()
 
-  for (var i = 0; i < 500; i++) {
+  for (var i = 0; i < 700; i++) {
     var x_pred = nj.zeros([1, maxlen, 61]).tolist()
     for (var j = 0; j < seed.length; j++) {
       x_pred[0][j][char_indices[seed.charAt(j)]] = 1
