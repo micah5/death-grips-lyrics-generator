@@ -9,6 +9,18 @@ import numpy as np
 import random
 import sys
 import io
+from argparse import ArgumentParser
+
+parser = ArgumentParser()
+parser.add_argument("-e", "--epochs", dest="epochs",
+                    help="number of epochs to run")
+args = parser.parse_args()
+epochs = args.epochs
+if epochs == None:
+    epochs = 40
+print('RUNNING FOR', epochs, 'epochs')
+
+args = parser.parse_args()
 
 with io.open('lyrics.txt', encoding='utf-8') as f:
     text = f.read().lower()
@@ -93,6 +105,6 @@ print_callback = LambdaCallback(on_epoch_end=on_epoch_end)
 
 model.fit(x, y,
           batch_size=50,
-          epochs=40,
+          epochs=epochs,
           callbacks=[print_callback])
 model.save('model.keras')
